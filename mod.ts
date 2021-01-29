@@ -3,15 +3,15 @@ function routine<T = any>(
   ...args: any[]
 ): Promise<T> {
   const wrapped = (): any => {
-    // @ts-ignore
+    // @ts-ignore as this code is inside of worker
     self.onmessage = (event: MessageEvent) => {
       // data are actually the args given to the wrapped function
       const data: any = event.data;
       const result = fn.apply(null, data);
 
-      // @ts-ignore
+      // @ts-ignore as this code is inside of worker
       self.postMessage(result);
-      // @ts-ignore
+      // @ts-ignore as this code is inside of worker
       self.close();
     };
   };
@@ -22,15 +22,16 @@ function routine<T = any>(
     .replace(/\s*}[^}]*$/, "") // making the function a "file"
     .replace(/fn/, `(${fn.toString()})`); // replacing the wrapped fn by it's body
 
-  const tempWorker = Deno.makeTempFileSync(
-    { prefix: "__routine", suffix: ".worker.js" },
-  );
+  const tempWorker = Deno.makeTempFileSync({
+    prefix: "__routine",
+    suffix: ".worker.js",
+  });
   Deno.writeTextFileSync(tempWorker, wrappedBody);
 
-  const worker = new Worker(
-    new URL(tempWorker, import.meta.url).href,
-    { type: "module", deno: true },
-  );
+  const worker = new Worker(`file://${tempWorker}`, {
+    type: "module",
+    deno: true,
+  });
 
   worker.postMessage(args);
 

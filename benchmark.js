@@ -27,14 +27,11 @@ if (FLAGS["routine"]) {
     routine(inneficientSquare, 80001),
   ]);
 } else {
-  results = [
-    inneficientSquare(80001),
-    inneficientSquare(80001),
-  ];
+  results = [inneficientSquare(80001), inneficientSquare(80001)];
 }
 
 console.log(
   FLAGS["routine"] ? "With" : "Without",
   `routine, computed in ${((performance.now() - t0) / 1000).toFixed(3)}s: `,
-  results[0] * results[1],
+  results[0] * results[1]
 );
